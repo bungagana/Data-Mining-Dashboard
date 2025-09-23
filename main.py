@@ -148,12 +148,120 @@ st.markdown("---")
 # Sidebar navigation
 # -----------------------
 st.sidebar.title("Navigation")
-page = st.sidebar.radio("Go to", ["EDA (Raw Data)", "Preprocessing", "Feature Selection (LOS)", "Modeling"])
+page = st.sidebar.radio("Go to", [
+    "Pendahuluan",  # <- tambahkan ini
+    "EDA (Raw Data)",
+    "Preprocessing",
+    "Feature Selection (LOS)",
+    "Modeling"
+])
+
 
 st.sidebar.markdown("---")
 st.sidebar.markdown("Display options")
 palette = st.sidebar.selectbox("Seaborn palette", ["viridis", "Set2", "mako", "coolwarm"], index=0)
 sns.set_palette(palette)
+
+import streamlit as st
+import pandas as pd
+import base64
+
+def show_pdf(file_path, width=600, height=800):
+    with open(file_path, "rb") as f:
+        base64_pdf = base64.b64encode(f.read()).decode("utf-8")
+    pdf_display = f'''
+    <iframe 
+        src="data:application/pdf;base64,{base64_pdf}" 
+        width="{width}" 
+        height="{height}" 
+        type="application/pdf" 
+        style="border:none;">
+    </iframe>'''
+    return pdf_display
+
+if page == "Pendahuluan":
+    st.title("Pendahuluan")
+    
+    # Header utama
+    st.markdown("""
+    ### Preprocessing & Exploratory Data Analysis (EDA) pada Dataset LOS & Status Gizi Anak  
+    **Sumber Dataset:** *Malnutrition Cohort Study (2019–2024)*
+
+    **Anggota Tim:**  
+    - Anggun Dwi Rizkika  
+    - Bunga Laelatul Muna  
+    - Wan Sabrina Mayzura
+
+    **Deskripsi:**  
+    Notebook ini mencakup proses preprocessing (pembersihan data, imputasi missing values, normalisasi fitur, dan deteksi outlier) serta EDA (analisis distribusi LOS, demografi, status gizi, missed visits, dan korelasi variabel).  
+    Tujuan utama analisis adalah memahami pola **lama rawat inap (Length of Stay / LOS)** dan faktor-faktor **klinis serta administratif** yang memengaruhinya.
+    """)
+
+    st.markdown("---")
+
+    # Dataset & Notebook
+    st.markdown("### Sumber Dataset & Notebook")
+    st.markdown("""
+    - Dataset Zenodo: [https://zenodo.org/records/7343363](https://zenodo.org/records/7343363)  
+    - Notebook Eksplorasi Awal (Kaggle): [https://www.kaggle.com/code/bungalaelatulmuna/cohor](https://www.kaggle.com/code/bungalaelatulmuna/cohor)
+    """)
+
+    st.markdown("---")
+
+    # Referensi artikel: 2 kolom sejajar
+    st.markdown("### Referensi Artikel Penelitian")
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.subheader("Artikel Utama")
+        st.markdown("*Implementing Digital Community‐Based Management of Malnutrition*  \n_Journal of Biomedical Informatics_")
+        st.markdown(show_pdf("main.pdf", width=500, height=650), unsafe_allow_html=True)
+
+    with col2:
+        st.subheader("Artikel Pembanding")
+        st.markdown("*Children Living with Disabilities Are Absent From Severe Malnutrition Guidelines*  \n_MDPI Nutrients_")
+        st.markdown(show_pdf("nutrients.pdf", width=500, height=650), unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    # Dokumentasi kolom dataset
+    st.markdown("### Dokumentasi Kolom Dataset")
+
+    data_pendahuluan = [
+        ("AnonID", "Identifikasi unik untuk setiap peserta (anonim)."),
+        ("adm_category", "Kategori penerimaan, menggambarkan tingkat keparahan atau klasifikasi malnutrisi saat penerimaan."),
+        ("adm_referral", "Metode rujukan, menunjukkan bagaimana anak dirujuk untuk perawatan."),
+        ("adm_site", "Tempat penerimaan perawatan."),
+        ("adm_sex", "Jenis kelamin anak."),
+        ("adm_age", "Usia anak pada saat penerimaan (bulan)."),
+        ("age_cat_1", "Kategorisasi usia berdasarkan rentang tertentu."),
+        ("age_cat_2", "Kategorisasi usia berdasarkan rentang usia lainnya."),
+        ("adm_muac", "Lingkar lengan atas tengah (MUAC) saat penerimaan (mm)."),
+        ("adm_kg", "Berat anak saat penerimaan (kg)."),
+        ("missed_1_visit", "Anak melewatkan satu kunjungan."),
+        ("missed_2_more_visit", "Anak melewatkan lebih dari satu kunjungan."),
+        ("missed_1_visit_cured", "Anak melewatkan satu kunjungan namun sembuh."),
+        ("missed_2_more_visit_cured", "Anak melewatkan >2 kunjungan namun sembuh."),
+        ("Screened_hf", "Disaring di fasilitas kesehatan."),
+        ("Screened_chw_chv", "Disaring oleh petugas komunitas (CHW/CHV)."),
+        ("Screened_cg_fm", "Disaring oleh pengasuh/keluarga."),
+        ("Cared_hf", "Dirawat di fasilitas kesehatan."),
+        ("Cared_hws", "Dirawat oleh petugas non-formal."),
+        ("Child's length or height at admission", "Panjang/tinggi anak saat masuk (cm)."),
+        ("Weight-for-height Z-score (WHZ)", "Z-score berat terhadap tinggi."),
+        ("Height-for-age Z-score (HAZ)", "Z-score tinggi terhadap usia."),
+        ("Weight-for-age Z-score (WAZ)", "Z-score berat terhadap usia."),
+        ("Treatment status at exit", "Status anak saat keluar."),
+        ("Treatment site categorization", "Kategori tempat perawatan."),
+        ("Nutritional status details (edema presence)", "Adanya edema saat masuk."),
+        ("Treatment regimen details (e.g., RUTF consumption)", "Detil rejimen perawatan seperti RUTF."),
+        ("Anthropometric measurements throughout treatment", "Data ukuran tubuh selama perawatan."),
+        ("Subgroup tracking", "Klasifikasi subkelompok (misalnya usia <24 bulan)."),
+        ("Community-based care indicators", "Indikator perawatan komunitas.")
+    ]
+
+    df_pendahuluan = pd.DataFrame(data_pendahuluan, columns=["Kolom", "Penjelasan"])
+    st.dataframe(df_pendahuluan, use_container_width=True)
 
 # -----------------------
 # 1) EDA (Raw Data)
