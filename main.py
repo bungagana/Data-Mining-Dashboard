@@ -600,62 +600,162 @@ elif page == "Feature Selection (LOS)":
 # -----------------------
 elif page == "Modeling":
     st.header("Modeling — Results Comparison")
-    
-    # Try to load model evaluation results locally
-    model_df = load_data_local("model_evaluation_results.csv")
-    if model_df is None:
-        st.info("File `model_evaluation_results.csv` tidak ditemukan secara lokal. Silakan taruh di direktori yang sama dengan app.")
-    else:
-        st.subheader("Tabel hasil model")
-        st.dataframe(model_df)
 
-        if {'Scenario', 'Model'}.issubset(model_df.columns):
-            pivot = (
-                model_df
-                .groupby(['Scenario', 'Model'])
-                .agg({'RMSE':'mean', 'MAE':'mean', 'R2':'mean'})
-                .reset_index()
-            )
-            st.subheader("Summary (mean metrics per Scenario & Model)")
-            st.dataframe(pivot.round(4))
+    st.markdown("""
+    <style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    th, td {
+        padding: 8px 12px;
+        text-align: left;
+        border-bottom: 1px solid #444;
+        vertical-align: top;
+        white-space: normal;
+        word-wrap: break-word;
+    }
+    th {
+        background-color: #1e1e1e;
+        color: #f5f5f5;
+    }
+    tr:nth-child(even) {
+        background-color: #222;
+    }
+    .fitur-table {
+        background-color: #0e1117;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-        # Pilih metric untuk dibandingkan
-        possible_metrics = [
-            c for c in model_df.columns if c.lower() in ['rmse','mae','r2','accuracy']
-        ] + [
-            c for c in model_df.columns if pd.api.types.is_numeric_dtype(model_df[c])
+    st.subheader("📋 Fitur yang Digunakan per Skenario")
+    fitur_data = {
+        "Scenario": ["baseline_all", "top10", "admission_only", "early_treatment"],
+        "Jumlah Fitur": [31, 10, 8, 12],
+        "Daftar Fitur": [
+            "adm_category, adm_age, age_cat_1, age_cat_2, adm_muac, adm_kg, adm_cm, adm_whz06, adm_waz06, adm_haz06, adm_oedema_YN, adm_whz06_lt_neg3, adm_whz06_neg2_neg3, adm_whz06_gt_neg2, adm_whzlt3, adm_whzgt3, adm_Weightlt7, adm_Weightgt7, adm_MUACgt110, adm_WAZltneg3, adm_WAZgtneg3, adm_cat_115, adm_cat_115_125, total_rutf, missed_0_visit, missed_1_visit, missed_2_more_visit, Screened_chw_chv, Screened_cg_fm, Cared_hf, age_group",
+            "muac_gain_velo, total_rutf, avg_daily_weight_gain, adm_muac, adm_cat_115_125, adm_cat_115, adm_category, adm_kg, adm_waz06, missed_0_visit",
+            "adm_muac, adm_waz06, adm_whz06, adm_haz06, adm_category, adm_oedema_YN, age_cat_1, age_cat_2",
+            "adm_muac, adm_waz06, adm_whz06, adm_haz06, adm_category, adm_oedema_YN, age_cat_1, age_cat_2, adm_kg, adm_cm, total_rutf, missed_1_visit"
         ]
-        possible_metrics = list(dict.fromkeys(possible_metrics))  # unique
+    }
+    fitur_df = pd.DataFrame(fitur_data)
+    st.markdown(fitur_df.to_html(classes='fitur-table', index=False, escape=False), unsafe_allow_html=True)
 
-        if possible_metrics:
-            metric = st.selectbox("Metric to compare", possible_metrics, index=0)
-            fig, ax = plt.subplots(figsize=(8, 4))
-            if {'Scenario', 'Model'}.issubset(model_df.columns):
-                sns.barplot(data=model_df, x='Scenario', y=metric, hue='Model', ax=ax)
-                ax.set_title(f"Perbandingan {metric} per Scenario & Model")
-                st.pyplot(fig)
+    st.markdown("---")
 
-        # Jika ada ≥2 metric numerik, tampilkan scatterplot perbandingan
-        metrics_available = [
-            c for c in model_df.columns if pd.api.types.is_numeric_dtype(model_df[c])
+    st.subheader("🤖 Hasil Model — Machine Learning")
+
+    ml_data = {
+        "Scenario": [
+            "admission_only", "admission_only", "admission_only", "admission_only", "admission_only", "admission_only",
+            "baseline_all", "baseline_all", "baseline_all", "baseline_all", "baseline_all", "baseline_all",
+            "early_treatment", "early_treatment", "early_treatment", "early_treatment", "early_treatment", "early_treatment",
+            "top10", "top10", "top10", "top10", "top10", "top10"
+        ],
+        "Model": [
+            "Gradient Boosting", "SVM", "AdaBoost", "Random Forest", "Decision Tree", "Naive Bayes",
+            "Gradient Boosting", "Random Forest", "SVM", "Decision Tree", "AdaBoost", "Naive Bayes",
+            "Gradient Boosting", "Random Forest", "SVM", "Decision Tree", "AdaBoost", "Naive Bayes",
+            "Random Forest", "Gradient Boosting", "SVM", "Decision Tree", "AdaBoost", "Naive Bayes"
+        ],
+        "RMSE": [
+            14.81, 14.96, 15.14, 15.85, 20.71, 27.05,
+            6.36, 6.45, 8.39, 9.17, 9.22, 27.63,
+            6.91, 7.02, 7.55, 10.06, 10.90, 21.22,
+            5.66, 5.71, 6.58, 7.24, 8.04, 20.09
+        ],
+        "MAE": [
+            10.08, 9.86, 10.78, 11.04, 14.04, 20.06,
+            2.71, 2.69, 3.55, 3.44, 3.52, 2.70,
+            2.99, 3.17, 3.38, 4.09, 4.32, 14.83,
+            1.99, 2.61, 2.66, 2.60, 3.39, 13.47
+        ],
+        "R2": [
+            0.434, 0.422, 0.408, 0.351, -0.108, -0.891,
+            0.895, 0.892, 0.818, 0.783, 0.780, -0.972,
+            0.877, 0.873, 0.853, 0.739, 0.673, -0.164,
+            0.917, 0.917, 0.888, 0.865, 0.879, -0.043
         ]
-        if len(metrics_available) >= 2 and {'Scenario', 'Model'}.issubset(model_df.columns):
-            st.subheader("Comparative charts")
-            m1 = st.selectbox("Metric 1", metrics_available, index=0)
-            m2 = st.selectbox("Metric 2", metrics_available, index=min(1, len(metrics_available)-1))
-            fig2, ax2 = plt.subplots(figsize=(8, 4))
-            sns.scatterplot(
-                data=model_df, x=m1, y=m2,
-                hue='Model', style='Scenario', s=100, ax=ax2
-            )
-            ax2.set_title(f"{m1} vs {m2} (per Model/Scenario)")
-            st.pyplot(fig2)
+    }
+    ml_df = pd.DataFrame(ml_data)
 
-        # Download model results
-        summary_buf = to_download_bytes(model_df, name='model_results_summary.csv')
-        st.download_button(
-            "Download model results",
-            data=summary_buf,
-            file_name='model_results_summary.csv',
-            mime="text/csv"
-        )
+    def df_to_html_merged(df):
+        html = '<table style="width:100%"><thead><tr>'
+        for col in df.columns:
+            html += f'<th>{col}</th>'
+        html += '</tr></thead><tbody>'
+        for scenario, group in df.groupby("Scenario"):
+            rowspan = len(group)
+            first_row = True
+            for _, row in group.iterrows():
+                html += '<tr>'
+                if first_row:
+                    html += f'<td rowspan="{rowspan}" style="font-weight:600;background:#101820;">{scenario}</td>'
+                    first_row = False
+                html += f"<td>{row['Model']}</td><td>{row['RMSE']}</td><td>{row['MAE']}</td><td>{row['R2']}</td>"
+                html += '</tr>'
+        html += '</tbody></table>'
+        return html
+
+    st.markdown(df_to_html_merged(ml_df), unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    st.subheader("🧠 Hasil Model — Deep Learning")
+
+    dl_data = {
+        "Scenario": [
+            "admission_only", "admission_only", "admission_only",
+            "baseline_all", "baseline_all", "baseline_all",
+            "early_treatment", "early_treatment", "early_treatment",
+            "top10", "top10", "top10"
+        ],
+        "Model": [
+            "ResNet", "MLP", "DeepBaseline",
+            "DeepBaseline", "ResNet", "MLP",
+            "DeepBaseline", "DeepBaseline", "MLP",
+            "ResNet", "DeepBaseline", "MLP"
+        ],
+        "RMSE": [
+            14.80, 14.81, 14.81,
+            6.33, 6.36, 6.44,
+            6.83, 6.86, 6.95,
+            5.71, 5.74, 5.75
+        ],
+        "MAE": [
+            10.00, 10.00, 9.97,
+            2.81, 2.82, 2.80,
+            3.36, 3.07, 3.13,
+            2.57, 2.54, 2.55
+        ],
+        "R2": [
+            0.434, 0.434, 0.431,
+            0.896, 0.896, 0.893,
+            0.880, 0.878, 0.875,
+            0.915, 0.916, 0.915
+        ]
+    }
+    dl_df = pd.DataFrame(dl_data)
+    st.markdown(df_to_html_merged(dl_df).replace("#101820", "#241720"), unsafe_allow_html=True)
+
+    st.markdown("---")
+
+    st.subheader("📊 Perbandingan Metrik Model")
+    all_models = pd.concat([ml_df.assign(Type="Machine Learning"), dl_df.assign(Type="Deep Learning")], ignore_index=True)
+    possible_metrics = ["RMSE", "MAE", "R2"]
+    metric = st.selectbox("Pilih metrik untuk dibandingkan", possible_metrics, index=0)
+    fig, ax = plt.subplots(figsize=(8, 4))
+    sns.barplot(data=all_models, x="Scenario", y=metric, hue="Model", ax=ax)
+    ax.set_title(f"Perbandingan {metric} per Scenario & Model")
+    st.pyplot(fig)
+
+    if len(possible_metrics) >= 2:
+        st.subheader("📈 Scatter Plot perbandingan antar metrik")
+        m1 = st.selectbox("Metric 1", possible_metrics, index=0)
+        m2 = st.selectbox("Metric 2", possible_metrics, index=1)
+        fig2, ax2 = plt.subplots(figsize=(8, 4))
+        sns.scatterplot(data=all_models, x=m1, y=m2, hue="Type", style="Scenario", s=100, ax=ax2)
+        ax2.set_title(f"{m1} vs {m2} (per Model dan Scenario)")
+        st.pyplot(fig2)
