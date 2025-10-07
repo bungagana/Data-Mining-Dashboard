@@ -453,6 +453,13 @@ elif page == "Preprocessing":
 elif page == "Feature Selection (LOS)":
     st.header("Feature Selection for LOS Prediction")
 
+    absolute_leakage = [
+        "LOS", "recovered_los", 
+        "cured", "defaulted", "non_response", "died",
+        "weight_gain_cured", "muac_gain_cured", "rutf_cured",
+        "missed_0_visit_cured", "missed_1_visit_cured", "missed_2_more_visit_cured"
+    ]
+
     if "LOS" not in df_cleaned.columns:
         st.error("Kolom `LOS` tidak ditemukan pada dataset yang sudah di-cleaned.")
     else:
@@ -472,14 +479,12 @@ elif page == "Feature Selection (LOS)":
             else:
                 corr_series = numeric_only.corr(method=corr_method)["LOS"].sort_values(ascending=False)
                 st.dataframe(corr_series.to_frame("correlation").round(4))
-
                 top_k = st.slider("Top K features to show", 5, min(30, len(corr_series)), value=12)
                 top_corr = corr_series.drop(index="LOS").abs().sort_values(ascending=False).head(top_k)
                 fig, ax = plt.subplots(figsize=(6, top_k * 0.4 + 1))
                 sns.barplot(x=top_corr.values, y=top_corr.index, ax=ax)
                 ax.set_xlabel(f"|Correlation with LOS| ({corr_method})")
                 st.pyplot(fig)
-
                 heat_k = min(12, len(numeric_only.columns))
                 top_feats = corr_series.abs().sort_values(ascending=False).head(heat_k).index.tolist()
                 heat_df = numeric_only[top_feats].corr()
@@ -491,10 +496,10 @@ elif page == "Feature Selection (LOS)":
         with tab_rf:
             st.subheader("Random Forest — Feature Importance")
             X = df_cleaned.drop(columns=["LOS"])
+            X = X.drop(columns=[c for c in absolute_leakage if c in X.columns], errors="ignore")
             y = df_cleaned["LOS"]
             X_enc = pd.get_dummies(X, drop_first=True)
             X_enc = X_enc.select_dtypes(include=[np.number]).fillna(0)
-
             if X_enc.shape[1] == 0:
                 st.info("Tidak ada fitur numeric/encoded untuk RandomForest.")
             else:
@@ -502,7 +507,6 @@ elif page == "Feature Selection (LOS)":
                 rf.fit(X_enc, y)
                 imp = pd.Series(rf.feature_importances_, index=X_enc.columns).sort_values(ascending=False)
                 st.dataframe(imp.head(100).to_frame("importance").round(5))
-
                 fig, ax = plt.subplots(figsize=(8, min(20, len(imp.head(20))) * 0.45 + 1))
                 sns.barplot(x=imp.head(20).values, y=imp.head(20).index, ax=ax)
                 ax.set_title("Top 20 Feature Importances (Random Forest)")
@@ -529,29 +533,23 @@ elif page == "Feature Selection (LOS)":
 # -----------------------
         with tab_pca:
             st.subheader("Principal Component Analysis (PCA)")
-
             from sklearn.decomposition import PCA
-
             exclude_cols = [
                 "LOS", "in_treatment", "adm_WaSt_category",
                 "adm_WHZltneg3WAZgtneg3", "adm_MUAClt110", 
                 "Screened_hf", "adm_WHZgtneg3WAZgtneg3", 
                 "Cared_hws", "AnonID"
             ]
-
             X = df_scaled.drop(columns=exclude_cols, errors="ignore")
             X = X.select_dtypes(include=[np.number])
-
             if X.shape[1] < 2:
                 st.info("Tidak cukup fitur numerik untuk PCA.")
             else:
                 n_comp = st.slider("Jumlah komponen PCA", 2, X.shape[1], 5)
                 pca = PCA(n_components=n_comp, random_state=42)
                 pcs = pca.fit_transform(X)
-
                 var_ratio = pca.explained_variance_ratio_
                 cum_var = np.cumsum(var_ratio)
-
                 st.markdown("### Scree Plot — Cumulative Variance Explained")
                 var_df = pd.DataFrame({
                     "PC": [f"PC{i+1}" for i in range(len(var_ratio))],
@@ -559,7 +557,6 @@ elif page == "Feature Selection (LOS)":
                     "Cumulative Variance": cum_var
                 })
                 st.dataframe(var_df)
-
                 fig, ax = plt.subplots(figsize=(7,4))
                 ax.plot(range(1, len(cum_var)+1), cum_var, marker="o", linestyle="-", color="orange")
                 ax.set_xticks(range(1, len(cum_var)+1))
@@ -567,7 +564,6 @@ elif page == "Feature Selection (LOS)":
                 ax.set_ylabel("Cumulative Explained Variance")
                 ax.set_title("Scree Plot (Cumulative Variance)")
                 st.pyplot(fig)
-
                 if "LOS" in df_scaled.columns:
                     fig2, ax2 = plt.subplots(figsize=(6,5))
                     sns.scatterplot(
@@ -579,16 +575,13 @@ elif page == "Feature Selection (LOS)":
                     ax2.set_ylabel("PC2")
                     ax2.set_title("PCA Projection (PC1 vs PC2, colored by LOS)")
                     st.pyplot(fig2)
-
                 loadings = pd.DataFrame(
                     pca.components_.T,
                     columns=[f"PC{i+1}" for i in range(n_comp)],
                     index=X.columns
                 )
-
                 st.markdown("### Feature Loadings")
                 st.dataframe(loadings.round(4))
-
                 top_k = st.slider("Top K Features untuk Heatmap", 5, loadings.shape[0], 20)
                 fig3, ax3 = plt.subplots(figsize=(10, 6))
                 sns.heatmap(loadings.iloc[:top_k], annot=True, fmt=".2f", cmap="coolwarm", ax=ax3)
