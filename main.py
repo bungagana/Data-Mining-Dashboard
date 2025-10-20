@@ -694,6 +694,21 @@ elif page == "Modeling":
 
     st.markdown(df_to_html_merged(ml_df), unsafe_allow_html=True)
 
+    st.markdown("""
+    ### 📊 Analisis Model Machine Learning
+
+    - **Skenario terbaik adalah _top10_**, dengan performa paling tinggi dan konsisten di antara seluruh skenario.  
+    - Model **Random Forest** mencapai hasil terbaik (RMSE = 5.66, MAE = 1.99, R² = 0.92).  
+    - Penggunaan sepuluh fitur paling relevan meningkatkan akurasi karena hanya mempertahankan variabel yang benar-benar berpengaruh terhadap lama perawatan pasien.  
+    - Fitur yang lebih ringkas membuat model lebih fokus, mengurangi noise, dan mempercepat proses pembelajaran tanpa kehilangan informasi penting.  
+    - Hasil ini menunjukkan bahwa pemilihan fitur yang tepat lebih berdampak pada peningkatan performa dibandingkan sekadar menambah jumlah fitur.
+
+    - **Model ensemble seperti Random Forest dan Gradient Boosting** memberikan hasil terbaik dibandingkan model tunggal lainnya.  
+    - Pendekatan *ensemble* menggabungkan beberapa pohon keputusan untuk mengurangi variansi dan meningkatkan stabilitas prediksi.  
+    - Model ini mampu menangkap hubungan non-linear yang kompleks dalam data medis, yang sering kali tidak bisa dijelaskan oleh model sederhana.  
+    - Kombinasi fitur optimal dan algoritma ensemble menghasilkan model yang kuat, akurat, serta lebih mudah diinterpretasikan dalam konteks klinis.
+    """)
+
     st.markdown("---")
 
     st.subheader("🧠 Hasil Model — Deep Learning")
@@ -732,6 +747,20 @@ elif page == "Modeling":
     }
     dl_df = pd.DataFrame(dl_data)
     st.markdown(df_to_html_merged(dl_df).replace("#101820", "#241720"), unsafe_allow_html=True)
+
+    st.markdown("""
+    ### 🧠 Analisis Model Deep Learning
+
+    - **Skenario terbaik adalah _top10_** dengan performa paling tinggi di seluruh pengujian.  
+    - Model **CatBoost (Tuned)** mencapai hasil terbaik dengan RMSE = 2.44, MAE = 1.24, dan R² = 0.98.  
+    - Pemilihan sepuluh fitur utama menghasilkan data yang lebih fokus dan representatif terhadap faktor klinis yang memengaruhi lama perawatan.  
+    - CatBoost (Tuned) bekerja optimal karena menerapkan mekanisme *ordered boosting* yang menyesuaikan bobot antarfitur secara dinamis dan efisien.
+
+    - **CatBoost (Tuned)** memberikan kinerja paling stabil pada data tabular.  
+    - Algoritma ini memanfaatkan pohon keputusan bertingkat untuk mengenali pola kompleks secara konsisten.  
+    - Penyetelan hiperparameter memperkuat kemampuan model dalam meminimalkan kesalahan prediksi.  
+    - Proses pelatihan yang efisien dan akurat menghasilkan model dengan keseimbangan optimal antara ketepatan hasil dan kestabilan performa.
+    """)
 
     st.markdown("---")
 
