@@ -700,34 +700,34 @@ elif page == "Modeling":
 
     dl_data = {
         "Scenario": [
-            "admission_only", "admission_only", "admission_only",
-            "baseline_all", "baseline_all", "baseline_all",
-            "early_treatment", "early_treatment", "early_treatment",
-            "top10", "top10", "top10"
+            "admission_only", "admission_only", "admission_only", "admission_only", "admission_only",
+            "baseline_all", "baseline_all", "baseline_all", "baseline_all", "baseline_all",
+            "early_treatment", "early_treatment", "early_treatment", "early_treatment", "early_treatment",
+            "top10", "top10", "top10", "top10", "top10"
         ],
         "Model": [
-            "ResNet", "MLP", "DeepBaseline",
-            "DeepBaseline", "ResNet", "MLP",
-            "DeepBaseline", "DeepBaseline", "MLP",
-            "ResNet", "DeepBaseline", "MLP"
+            "ResNet", "MLP", "DeepBaseline", "CatBoost (OOF)", "CatBoost (Tuned)",
+            "DeepBaseline", "ResNet", "MLP", "CatBoost (OOF)", "CatBoost (Tuned)",
+            "DeepBaseline", "DeepBaseline", "MLP", "CatBoost (OOF)", "CatBoost (Tuned)",
+            "ResNet", "DeepBaseline", "MLP", "CatBoost (OOF)", "CatBoost (Tuned)"
         ],
         "RMSE": [
-            14.80, 14.81, 14.81,
-            6.33, 6.36, 6.44,
-            6.83, 6.86, 6.95,
-            5.71, 5.74, 5.75
+            14.80, 14.81, 14.81, 14.69, 14.22,
+            6.33, 6.36, 6.44, 5.88, 5.05,
+            6.83, 6.86, 6.95, 6.50, 6.22,
+            5.71, 5.74, 5.75, 5.19, 2.44
         ],
         "MAE": [
-            10.00, 10.00, 9.97,
-            2.81, 2.82, 2.80,
-            3.36, 3.07, 3.13,
-            2.57, 2.54, 2.55
+            10.00, 10.00, 9.97, 10.08, 9.82,
+            2.81, 2.82, 2.80, 2.56, 2.32,
+            3.36, 3.07, 3.13, 2.91, 2.83,
+            2.57, 2.54, 2.55, 2.20, 1.24
         ],
         "R2": [
-            0.434, 0.434, 0.431,
-            0.896, 0.896, 0.893,
-            0.880, 0.878, 0.875,
-            0.915, 0.916, 0.915
+            0.43, 0.43, 0.43, 0.44, 0.47,
+            0.90, 0.90, 0.89, 0.91, 0.93,
+            0.88, 0.88, 0.87, 0.89, 0.90,
+            0.91, 0.92, 0.91, 0.93, 0.98
         ]
     }
     dl_df = pd.DataFrame(dl_data)
