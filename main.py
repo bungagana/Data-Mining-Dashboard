@@ -645,31 +645,36 @@ elif page == "Modeling":
             "admission_only", "admission_only", "admission_only", "admission_only", "admission_only", "admission_only",
             "baseline_all", "baseline_all", "baseline_all", "baseline_all", "baseline_all", "baseline_all",
             "early_treatment", "early_treatment", "early_treatment", "early_treatment", "early_treatment", "early_treatment",
-            "top10", "top10", "top10", "top10", "top10", "top10"
+            "top10", "top10", "top10", "top10", "top10", "top10",
+            "top10", "baseline_all", "early_treatment"
         ],
         "Model": [
             "Gradient Boosting", "SVM", "AdaBoost", "Random Forest", "Decision Tree", "Naive Bayes",
             "Gradient Boosting", "Random Forest", "SVM", "Decision Tree", "AdaBoost", "Naive Bayes",
             "Gradient Boosting", "Random Forest", "SVM", "Decision Tree", "AdaBoost", "Naive Bayes",
-            "Random Forest", "Gradient Boosting", "SVM", "Decision Tree", "AdaBoost", "Naive Bayes"
+            "Random Forest", "Gradient Boosting", "SVM", "Decision Tree", "AdaBoost", "Naive Bayes",
+            "CatBoost (Tuned)", "CatBoost (Tuned)", "CatBoost (Tuned)"
         ],
         "RMSE": [
             14.81, 14.96, 15.14, 15.85, 20.71, 27.05,
             6.36, 6.45, 8.39, 9.17, 9.22, 27.63,
             6.91, 7.02, 7.55, 10.06, 10.90, 21.22,
-            5.66, 5.71, 6.58, 7.24, 8.04, 20.09
+            5.66, 5.71, 6.58, 7.24, 8.04, 20.09,
+            2.44, 5.05, 6.22
         ],
         "MAE": [
             10.08, 9.86, 10.78, 11.04, 14.04, 20.06,
             2.71, 2.69, 3.55, 3.44, 3.52, 2.70,
             2.99, 3.17, 3.38, 4.09, 4.32, 14.83,
-            1.99, 2.61, 2.66, 2.60, 3.39, 13.47
+            1.99, 2.61, 2.66, 2.60, 3.39, 13.47,
+            1.24, 2.32, 2.83
         ],
         "R2": [
             0.434, 0.422, 0.408, 0.351, -0.108, -0.891,
             0.895, 0.892, 0.818, 0.783, 0.780, -0.972,
             0.877, 0.873, 0.853, 0.739, 0.673, -0.164,
-            0.917, 0.917, 0.888, 0.865, 0.879, -0.043
+            0.917, 0.917, 0.888, 0.865, 0.879, -0.043,
+            0.98, 0.93, 0.90
         ]
     }
     ml_df = pd.DataFrame(ml_data)
@@ -696,17 +701,10 @@ elif page == "Modeling":
 
     st.markdown("""
     ### 📊 Analisis Model Machine Learning
-
-    - **Skenario terbaik adalah _top10_**, dengan performa paling tinggi dan konsisten di antara seluruh skenario.  
-    - Model **Random Forest** mencapai hasil terbaik (RMSE = 5.66, MAE = 1.99, R² = 0.92).  
-    - Penggunaan sepuluh fitur paling relevan meningkatkan akurasi karena hanya mempertahankan variabel yang benar-benar berpengaruh terhadap lama perawatan pasien.  
-    - Fitur yang lebih ringkas membuat model lebih fokus, mengurangi noise, dan mempercepat proses pembelajaran tanpa kehilangan informasi penting.  
-    - Hasil ini menunjukkan bahwa pemilihan fitur yang tepat lebih berdampak pada peningkatan performa dibandingkan sekadar menambah jumlah fitur.
-
-    - **Model ensemble seperti Random Forest dan Gradient Boosting** memberikan hasil terbaik dibandingkan model tunggal lainnya.  
-    - Pendekatan *ensemble* menggabungkan beberapa pohon keputusan untuk mengurangi variansi dan meningkatkan stabilitas prediksi.  
-    - Model ini mampu menangkap hubungan non-linear yang kompleks dalam data medis, yang sering kali tidak bisa dijelaskan oleh model sederhana.  
-    - Kombinasi fitur optimal dan algoritma ensemble menghasilkan model yang kuat, akurat, serta lebih mudah diinterpretasikan dalam konteks klinis.
+    - Skenario terbaik adalah *top10*, menghasilkan performa paling stabil dan akurat.
+    - Model **CatBoost (Tuned)** mencapai hasil terbaik (RMSE = 2.44, MAE = 1.24, R² = 0.98), diikuti oleh **Random Forest**.
+    - CatBoost unggul karena *ordered boosting* yang mencegah target leakage, regularisasi adaptif, dan native handling categorical features yang menjaga relasi antar fitur.
+    - Random Forest tetap kompetitif karena mekanisme bagging yang menekan variansi dan efektif pada interaksi non-linear di data klinis tabular.
     """)
 
     st.markdown("---")
@@ -715,51 +713,44 @@ elif page == "Modeling":
 
     dl_data = {
         "Scenario": [
-            "admission_only", "admission_only", "admission_only", "admission_only", "admission_only",
-            "baseline_all", "baseline_all", "baseline_all", "baseline_all", "baseline_all",
-            "early_treatment", "early_treatment", "early_treatment", "early_treatment", "early_treatment",
-            "top10", "top10", "top10", "top10", "top10"
+            "admission_only", "admission_only", "admission_only",
+            "baseline_all", "baseline_all", "baseline_all",
+            "early_treatment", "early_treatment", "early_treatment",
+            "top10", "top10", "top10"
         ],
         "Model": [
-            "ResNet", "MLP", "DeepBaseline", "CatBoost (OOF)", "CatBoost (Tuned)",
-            "DeepBaseline", "ResNet", "MLP", "CatBoost (OOF)", "CatBoost (Tuned)",
-            "DeepBaseline", "DeepBaseline", "MLP", "CatBoost (OOF)", "CatBoost (Tuned)",
-            "ResNet", "DeepBaseline", "MLP", "CatBoost (OOF)", "CatBoost (Tuned)"
+            "ResNet", "MLP", "DeepBaseline",
+            "DeepBaseline", "ResNet", "MLP",
+            "DeepBaseline", "ResNet", "MLP",
+            "ResNet", "DeepBaseline", "MLP"
         ],
         "RMSE": [
-            14.80, 14.81, 14.81, 14.69, 14.22,
-            6.33, 6.36, 6.44, 5.88, 5.05,
-            6.83, 6.86, 6.95, 6.50, 6.22,
-            5.71, 5.74, 5.75, 5.19, 2.44
+            14.80, 14.81, 14.81,
+            6.33, 6.36, 6.44,
+            6.83, 6.86, 6.95,
+            5.71, 5.74, 5.75
         ],
         "MAE": [
-            10.00, 10.00, 9.97, 10.08, 9.82,
-            2.81, 2.82, 2.80, 2.56, 2.32,
-            3.36, 3.07, 3.13, 2.91, 2.83,
-            2.57, 2.54, 2.55, 2.20, 1.24
+            10.00, 10.00, 9.97,
+            2.81, 2.82, 2.80,
+            3.36, 3.07, 3.13,
+            2.57, 2.54, 2.55
         ],
         "R2": [
-            0.43, 0.43, 0.43, 0.44, 0.47,
-            0.90, 0.90, 0.89, 0.91, 0.93,
-            0.88, 0.88, 0.87, 0.89, 0.90,
-            0.91, 0.92, 0.91, 0.93, 0.98
+            0.43, 0.43, 0.43,
+            0.90, 0.90, 0.89,
+            0.88, 0.88, 0.87,
+            0.91, 0.92, 0.91
         ]
     }
     dl_df = pd.DataFrame(dl_data)
     st.markdown(df_to_html_merged(dl_df).replace("#101820", "#241720"), unsafe_allow_html=True)
 
     st.markdown("""
-    ### 🧠 Analisis Model Deep Learning
-
-    - **Skenario terbaik adalah _top10_** dengan performa paling tinggi di seluruh pengujian.  
-    - Model **CatBoost (Tuned)** mencapai hasil terbaik dengan RMSE = 2.44, MAE = 1.24, dan R² = 0.98.  
-    - Pemilihan sepuluh fitur utama menghasilkan data yang lebih fokus dan representatif terhadap faktor klinis yang memengaruhi lama perawatan.  
-    - CatBoost (Tuned) bekerja optimal karena menerapkan mekanisme *ordered boosting* yang menyesuaikan bobot antarfitur secara dinamis dan efisien.
-
-    - **CatBoost (Tuned)** memberikan kinerja paling stabil pada data tabular.  
-    - Algoritma ini memanfaatkan pohon keputusan bertingkat untuk mengenali pola kompleks secara konsisten.  
-    - Penyetelan hiperparameter memperkuat kemampuan model dalam meminimalkan kesalahan prediksi.  
-    - Proses pelatihan yang efisien dan akurat menghasilkan model dengan keseimbangan optimal antara ketepatan hasil dan kestabilan performa.
+    ### 🧠 Analisis Deep Learning
+    - Performa ResNet, MLP, dan DeepBaseline konsisten (R² ≈ 0.87–0.92), tetapi masih berada di bawah CatBoost.
+    - Hal ini wajar, karena dataset bersifat tabular non-sekuensial sehingga tidak kaya struktur yang dapat dieksplor jaringan neural.
+    - Pada data tabular klinis, *tree-based boosting* lebih efisien dalam mempelajari interaksi fitur dibanding deep network.
     """)
 
     st.markdown("---")
