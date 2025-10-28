@@ -719,10 +719,10 @@ elif page == "Modeling":
             "top10", "top10", "top10"
         ],
         "Model": [
-            "ResNet", "MLP", "DeepBaseline",
-            "DeepBaseline", "ResNet", "MLP",
-            "DeepBaseline", "ResNet", "MLP",
-            "ResNet", "DeepBaseline", "MLP"
+            "ResNet", "MLP : 1 hidden layer - 64 layer", "MLP : 64 hidden layer - 256 layer size",
+            "MLP : 64 hidden layer - 256 layer size", "ResNet", "MLP : 1 hidden layer - 64 layer",
+            "MLP : 64 hidden layer - 256 layer size", "ResNet", "MLP : 1 hidden layer - 64 layer",
+            "ResNet", "MLP : 64 hidden layer - 256 layer size", "MLP : 1 hidden layer - 64 layer"
         ],
         "RMSE": [
             14.80, 14.81, 14.81,
